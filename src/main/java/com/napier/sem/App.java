@@ -90,11 +90,20 @@ public class App
         {
             // Create an SQL statement
             Statement stmt = con.createStatement();
+            // Create a to_date variable
+            String to_date = "9999-01-01";
             // Create string for SQL statement
             String strSelect =
-                    "SELECT emp_no, first_name, last_name "
+                    "SELECT employees.emp_no, first_name, last_name, title, salary, dept_name, dept_manager.emp_no AS manager "
                             + "FROM employees "
-                            + "WHERE emp_no = " + ID;
+                            + "INNER JOIN salaries USING (emp_no) "
+                            + "INNER JOIN titles USING (emp_no) "
+                            + "INNER JOIN dept_emp USING (emp_no) "
+                            + "INNER JOIN departments USING (dept_no) "
+                            + "INNER JOIN dept_manager USING (dept_no) "
+                            + "WHERE employees.emp_no = " + ID
+                            + " AND salaries.to_date = '" + to_date + "'"
+                            + " AND dept_manager.to_date = '" + to_date + "'";
             // Execute SQL statement
             ResultSet rset = stmt.executeQuery(strSelect);
             // Return new employee if valid.
@@ -105,6 +114,10 @@ public class App
                 emp.emp_no = rset.getInt("emp_no");
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
+                emp.title = rset.getString("title");
+                emp.salary = rset.getInt("salary");
+                emp.dept_name = rset.getString("dept_name");
+                emp.manager = rset.getString("manager");
                 return emp;
             }
             else
